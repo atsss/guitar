@@ -1,3 +1,4 @@
+// p5.js editor url: https://editor.p5js.org/atsss/sketches/93gVuXoqL
 // Small issue with the updateCounts(), it seems to be one step behind...
 // Copyright (c) 2018 ml5
 //
@@ -11,19 +12,13 @@ Image Classification using Feature Extraction with MobileNet and four classes
 
 let featureExtractor;
 let classifier;
-// let modelURL = "https://ciid.s3-us-west-2.amazonaws.com/09_machine_learning/model.json";
-// let hogeURL = "https://teachablemachine.withgoogle.com/models/TH7p858Kc/model.json";
 let video;
+let loss;
 let classificationResult = "";
 let previousResult = "";
 let confidence;
 
 let myClassNames = ["One", "Two", "Three", "Four", "Five", "Nothing"]; //Add as many classes as you wish
-let DoSound;
-let ReSound;
-let MiSound;
-let FaSound;
-let SolSound;
 
 function preload() {
   DoSound = loadSound("1 Position.m4a");
@@ -33,12 +28,6 @@ function preload() {
   SolSound = loadSound("5 Position.m4a");
 }
 
-function modelReady() {
-  console.log('model ready!');
-  console.log(classifier);
-  classifier.load('model.json', () => console.log('load!')); // classifir が promise
-}
-
 function setup() {
   createCanvas(640, 480);
 
@@ -46,9 +35,10 @@ function setup() {
   video.size(640, 480);
   video.hide();
 
+  // Extract the already learned features from MobileNet
   featureExtractor = ml5.featureExtractor('MobileNet', modelReady);
-  classifier = featureExtractor.classification(video, () => console.log('video ready'));
-  classify();
+  // Create a new classifier using those features and give the video we want to use
+  classifier = featureExtractor.classification(video, videoReady);
 
   fill(0, 255, 0);
   textSize(36);
@@ -97,9 +87,23 @@ function draw() {
   }
 }
 
+// A function to be called when the model has been loaded
+const modelReady = () => {
+  console.log('model ready');
+  classifier.load('model.json', customModelReady);
+}
+
+const customModelReady = () => {
+  console.log('custom model ready');
+  classifier.classify(gotResults);
+}
+
+// A function to be called when the video has loaded
+const videoReady = () => select('#videoStatus').html('Video ready!');
+
 // Classify the current frame.
 function classify() {
-  classifier.classify(video, gotResults);
+  classifier.classify(gotResults);
 }
 
 // Show the results
@@ -114,7 +118,7 @@ function gotResults(err, result) {
   previousResult = classificationResult;
   classificationResult = result[0].label;
   confidence = result[0].confidence;
-  // console.log(confidence);
+  console.log(confidence);
 
   classify();
-};
+}
