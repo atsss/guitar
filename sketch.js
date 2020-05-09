@@ -99,7 +99,7 @@ const customModelReady = () => {
 }
 
 // A function to be called when the video has loaded
-const videoReady = () => select('#videoStatus').html('Video ready!');
+const videoReady = () => console.log('Video ready!');
 
 // Classify the current frame.
 function classify() {
