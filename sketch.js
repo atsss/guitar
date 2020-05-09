@@ -23,6 +23,7 @@ let myClasses = [];
 let myClassNames = ["Right", "Left", "Nothing"]; //Add as many classes as you wish
 
 function setup() {
+  console.log('emoji');
   createCanvas(640, 480);
 
   video = createCapture(VIDEO);
@@ -34,18 +35,17 @@ function setup() {
   // Create a new classifier using those features and give the video we want to use
   classifier = featureExtractor.classification(video, videoReady);
 
-  //featureExtractor.numClasses = myClassNames.length;
+  // featureExtractor.numClasses = myClassNames.length;
+
+  const options = {
+    numLabels: myClassNames.length
+  }; //Specify the number of classes/labels
+  classifier = featureExtractor.classification(video, options);
 
 
-  // const options = {
-  //   numLabels: myClassNames.length
-  // }; //Specify the number of classes/labels
-  // classifier = featureExtractor.classification(video, options);
-
-
-  // for (let i = 0; i < myClassNames.length; i++) {
-  //   myClasses.push(new Category(myClassNames[i]));
-  // }
+  for (let i = 0; i < myClassNames.length; i++) {
+    myClasses.push(new Category(myClassNames[i]));
+  }
 
   // Set up the UI buttons
   // setupButtons();
@@ -59,13 +59,13 @@ function draw() {
   background(122);
   image(video, 0, 0);
 
-  // for (let i = 0; i < myClassNames.length; i++) {
-  //
-  //   if (myClasses[i].recordExamples) {
-  //     addExample(myClasses[i].name);
-  //     myClasses[i].nExamples++;
-  //   }
-  // }
+  for (let i = 0; i < myClassNames.length; i++) {
+
+    if (myClasses[i].recordExamples) {
+      addExample(myClasses[i].name);
+      myClasses[i].nExamples++;
+    }
+  }
 
   //Make specific things happen when specific classes are detected
   if (classificationResult == myClassNames[0]) {
@@ -80,19 +80,9 @@ function draw() {
   text(emoji, width/2, 0.7*height);
 }
 
-// Category class
-class Category {
-  constructor(s) {
-    this.name = s;
-    this.recordExamples = false;
-    this.nExamples = 0;
-  }
-}
-
-
 // A function to be called when the model has been loaded
 const modelReady = () => {
-  console.log('model ready');
+  console.log('Model ready');
   classifier.load('model.json', customModelReady);
 }
 
@@ -124,6 +114,15 @@ function gotResults(err, result) {
   console.log(confidence);
 
   classify();
+}
+
+// Category class
+class Category {
+  constructor(s) {
+    this.name = s;
+    this.recordExamples = false;
+    this.nExamples = 0;
+  }
 }
 
 // Update the example count for each label
