@@ -29,6 +29,7 @@ function preload() {
 }
 
 function setup() {
+  console.log('01');
   createCanvas(640, 480);
 
   video = createCapture(VIDEO);
